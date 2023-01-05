@@ -10,8 +10,10 @@ services:
     ports:
       - "2565:2565"
     environment:
-      - DATABASE_URL=postgres://root:root@deploy_db:5432/assessment-db?sslmode=disable
-      - PORT=:2565
+      DATABASE_URL: postgres://root:root@db/assessment-db?sslmode=disable
+      DATABASE_DRIVER: postgres
+      PORT: 2565
+      AUTH_TOKEN: November 10, 2009
     volumes:
       - $PWD:/go/src/target
     depends_on:
