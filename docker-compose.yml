@@ -1,0 +1,32 @@
+version: '3.2'
+
+networks:
+  assessment-network:
+
+services:
+  app:
+    build: .
+    container_name: assessment-app
+    ports:
+      - "2565:2565"
+    environment:
+      - DATABASE_URL=postgres://root:root@deploy_db:5432/assessment-db?sslmode=disable
+      - PORT=:2565
+    volumes:
+      - $PWD:/go/src/target
+    depends_on:
+      - db
+    networks:
+      - assessment-network
+  db:
+    image: postgres:15.1-alpine
+    container_name: assessment-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: assessment-db
+    restart: on-failure
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    networks:
+      - assessment-network

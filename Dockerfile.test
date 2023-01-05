@@ -1,0 +1,18 @@
+FROM golang:1.19-alpine as build-base
+
+WORKDIR /app
+
+COPY go.mod .
+
+RUN go mod download
+
+COPY . .
+
+CMD CGO_ENABLED=0 go test --tags=integration ./...
+
+RUN go build -o ./out/test/assessment .
+
+FROM alpine:3.16.2
+COPY --from=build-base /app/out/test/assessment /app/test/assessment
+
+CMD ["/app/test/assessment"]
