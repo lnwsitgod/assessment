@@ -14,6 +14,7 @@ func GetExpenseHandler(c echo.Context) error {
 
 	stmt, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id = $1")
 	if err != nil {
+		c.Logger().Error("prepare statment error: ", err)
 		return c.JSON(http.StatusInternalServerError, Err{Message: errors.New("cannot prepare query expense statment").Error()})
 	}
 
@@ -21,8 +22,10 @@ func GetExpenseHandler(c echo.Context) error {
 	e := Expense{}
 	err = row.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
 	if err == sql.ErrNoRows {
+		c.Logger().Error("data not found: ", err)
 		return c.JSON(http.StatusNotFound, Err{Message: errors.New("expense not found").Error()})
 	} else if err != nil {
+		c.Logger().Error("scan expense error: ", err)
 		return c.JSON(http.StatusInternalServerError, Err{Message: errors.New("unable to scan expense").Error()})
 	}
 
