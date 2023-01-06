@@ -131,3 +131,84 @@ func TestGetExpenseHandler(t *testing.T) {
 		}
 	})
 }
+
+func TestGetExpensesHandler(t *testing.T) {
+	t.Run("Test case for successful get all expenses", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(req, rec)
+
+		mockSql := "SELECT id, title, amount, note, tags FROM expenses"
+		mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+			AddRow("1", "title1", 100.0, "note1", pq.Array([]string{"tag1", "tag2"})).
+			AddRow("2", "title2", 200.0, "note2", pq.Array([]string{"tag11", "tag22"}))
+		mockDB, mock, err := sqlmock.New()
+
+		db = mockDB
+		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WillReturnRows(mockRows)
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer mockDB.Close()
+
+		err = GetExpensesHandler(c)
+
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, `[{"id":1,"title":"title1","amount":100,"note":"note1","tags":["tag1","tag2"]},{"id":2,"title":"title2","amount":200,"note":"note2","tags":["tag11","tag22"]}]`, strings.TrimSpace(rec.Body.String()))
+		}
+	})
+
+	t.Run("Test case for unable to prepare query all expense", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(req, rec)
+
+		mockSql := "SELECT id, title, amount, note, tags FROM expensesx"
+		mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+			AddRow("1", "title1", 100.0, "note1", pq.Array([]string{"tag1", "tag2"})).
+			AddRow("2", "title2", 200.0, "note2", pq.Array([]string{"tag11", "tag22"}))
+		mockDB, mock, err := sqlmock.New()
+
+		db = mockDB
+		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WillReturnRows(mockRows)
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer mockDB.Close()
+
+		err = GetExpensesHandler(c)
+
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusInternalServerError, rec.Code)
+			assert.Equal(t, `{"message":"cannot query expense"}`, strings.TrimSpace(rec.Body.String()))
+		}
+	})
+
+	t.Run("Test case for unable to prepare scan all expense", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(req, rec)
+
+		mockSql := "SELECT id, title, amount, note, tags FROM expenses"
+		mockRows := sqlmock.NewRows([]string{"id", "title"}).AddRow("invalid", "title invalid")
+		mockDB, mock, err := sqlmock.New()
+
+		db = mockDB
+		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WillReturnRows(mockRows)
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer mockDB.Close()
+
+		err = GetExpensesHandler(c)
+
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusInternalServerError, rec.Code)
+			assert.Equal(t, `{"message":"unable to scan expense"}`, strings.TrimSpace(rec.Body.String()))
+		}
+	})
+}
