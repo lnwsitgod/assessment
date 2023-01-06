@@ -31,3 +31,25 @@ func GetExpenseHandler(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, e)
 }
+
+func GetExpensesHandler(c echo.Context) error {
+
+	rows, err := db.Query("SELECT id, title, amount, note, tags FROM expenses")
+	if err != nil {
+		c.Logger().Error("query statment error: ", err)
+		return c.JSON(http.StatusInternalServerError, Err{Message: errors.New("cannot query expense").Error()})
+	}
+
+	es := []Expense{}
+	for rows.Next() {
+		e := Expense{}
+		err = rows.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
+		if err != nil {
+			c.Logger().Error("scan expense error: ", err)
+			return c.JSON(http.StatusInternalServerError, Err{Message: errors.New("unable to scan expense").Error()})
+		}
+		es = append(es, e)
+	}
+
+	return c.JSON(http.StatusOK, es)
+}
