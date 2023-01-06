@@ -27,6 +27,7 @@ func main() {
 	g := e.Group("/expenses")
 	g.Use(authMiddlewareGuard)
 	g.POST("", expense.CreateExpenseHandler)
+	g.GET("/:id", expense.GetExpenseHandler)
 
 	startServerGracefullyShutdown(e)
 }
