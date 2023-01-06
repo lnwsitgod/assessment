@@ -29,6 +29,7 @@ func main() {
 	g.POST("", expense.CreateExpenseHandler)
 	g.GET("/:id", expense.GetExpenseHandler)
 	g.PUT("/:id", expense.UpdateExpenseHandler)
+	g.GET("", expense.GetExpensesHandler)
 
 	startServerGracefullyShutdown(e)
 }
