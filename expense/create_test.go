@@ -24,20 +24,16 @@ func TestCreateExpenseHandler(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
-		mockDB, mock, err := sqlmock.New()
-		if err != nil {
-			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-		}
-		defer mockDB.Close()
-		db = mockDB
-
 		mockSql := "INSERT INTO expenses (title, amount, note, tags) values ($1, $2, $3, $4) RETURNING id"
 		mockRows := sqlmock.NewRows([]string{"id"}).AddRow("1")
+		mockDB, mock, err := sqlmock.New()
 
+		db = mockDB
 		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WithArgs("title", 100.0, "note", pq.Array([]string{"tag1", "tag2"})).WillReturnRows(mockRows)
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
+		defer mockDB.Close()
 
 		err = CreateExpenseHandler(c)
 
@@ -133,15 +129,15 @@ func TestCreateExpenseHandler(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := echo.New().NewContext(req, rec)
 
+		mockSql := "INSERT INTO expenses (title, amount, note, tags) values ($1, $2, $3, $4) RETURNING id"
 		mockDB, mock, err := sqlmock.New()
+		db = mockDB
+
+		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WithArgs("title", 100.0, "note", pq.Array([]string{"tag1", "tag2"})).WillReturnError(errors.New("database error"))
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
 		defer mockDB.Close()
-		db = mockDB
-
-		mockSql := "INSERT INTO expenses (title, amount, note, tags) values ($1, $2, $3, $4) RETURNING id"
-		mock.ExpectQuery(regexp.QuoteMeta(mockSql)).WithArgs("title", 100.0, "note", pq.Array([]string{"tag1", "tag2"})).WillReturnError(errors.New("database error"))
 
 		err = CreateExpenseHandler(c)
 
