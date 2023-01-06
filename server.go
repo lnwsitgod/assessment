@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/lnwsitgod/assessment/expense"
 	"github.com/lnwsitgod/assessment/health"
 )
 
@@ -25,9 +26,7 @@ func main() {
 
 	g := e.Group("/expenses")
 	g.Use(authMiddlewareGuard)
-	g.GET("", func(c echo.Context) error {
-		return c.String(http.StatusOK, "You're authenticated!")
-	})
+	g.POST("", expense.CreateExpenseHandler)
 
 	startServerGracefullyShutdown(e)
 }
