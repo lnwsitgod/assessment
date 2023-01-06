@@ -1,11 +1,16 @@
+export DATABASE_URL=postgres://qbxrkhsv:Ugq4c2uuZe6xAL6MZ2USrwc84Tzg4Uwq@john.db.elephantsql.com/qbxrkhsv
+export DATABASE_DRIVER=postgres
+export PORT=2565
+export AUTH_TOKEN=November 10, 2009
+
 server:
-	PORT=2565 AUTH_TOKEN="November 10, 2009" go run server.go
+	go run server.go
 
 test:
-	AUTH_TOKEN="November 10, 2009" go test -cover -v ./... --tags=unit
+	go test -cover -v ./... --tags=unit
 
 test-cover:
-	AUTH_TOKEN="November 10, 2009" go test -coverprofile=coverage.out -v ./... --tags=unit
+	go test -coverprofile=coverage.out -v ./... --tags=unit
 	go tool cover -html=coverage.out
 
 docker-it-test-up:
