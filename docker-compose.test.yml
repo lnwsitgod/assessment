@@ -1,0 +1,34 @@
+version: '3.2'
+
+networks:
+  integration-test-assessment:
+
+services:
+  it_tests:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.test
+    container_name: it-tests
+    environment:
+      DATABASE_URL: postgresql://root:root@db_test/test-assessment-db?sslmode=disable
+      DATABASE_DRIVER: postgres
+      PORT: 2565
+      AUTH_TOKEN: November 10, 2009
+    volumes:
+      - $PWD:/go/src/target
+    depends_on:
+      - db_test
+    networks:
+      - integration-test-assessment
+  db_test:
+    image: postgres:15.1-alpine
+    container_name: test-assessment-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test-assessment-db
+    restart: on-failure
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    networks:
+      - integration-test-assessment
