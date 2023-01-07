@@ -2,5 +2,8 @@ FROM golang:1.19-alpine
 
 WORKDIR /go/src/target
 
-CMD CGO_ENABLED=0 go test --tags=integration -v ./...
+CMD CGO_ENABLED=0 PORT=2565 AUTH_TOKEN="November 10, 2009" \
+    DATABASE_URL=postgresql://root:root@db_test/test-assessment-db?sslmode=disable \
+    DATABASE_DRIVER=postgres \
+    go test --tags=integration -v ./...
 
