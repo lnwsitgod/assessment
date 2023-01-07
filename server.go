@@ -17,6 +17,10 @@ import (
 )
 
 func main() {
+
+	expense.InitDB()
+	defer expense.CloseDB()
+
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
 	e.Use(middleware.Logger())

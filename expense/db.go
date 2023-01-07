@@ -10,7 +10,7 @@ import (
 
 var db *sql.DB
 
-func init() {
+func InitDB() {
 	var err error
 	db, err = sql.Open(os.Getenv("DATABASE_DRIVER"), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -32,4 +32,8 @@ func init() {
 		log.Fatal("can't create table", err)
 	}
 
+}
+
+func CloseDB() {
+	defer db.Close()
 }
