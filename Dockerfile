@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go test --tags=unit -v ./...
+RUN CGO_ENABLED=0 AUTH_TOKEN="November 10, 2009" go test --tags=unit -v ./...
 
 RUN go build -o ./out/assessment .
 
