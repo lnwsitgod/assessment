@@ -14,6 +14,7 @@ services:
       DATABASE_DRIVER: postgres
       PORT: 2565
       AUTH_TOKEN: November 10, 2009
+    restart: on-failure
     volumes:
       - $PWD:/go/src/target
     depends_on:
